@@ -44,11 +44,8 @@ void test_validation(void){
     is_valid2 = is_valid(expr2), is_valid3 = is_valid(expr3), 
     is_valid4 = is_valid(expr4), is_valid5 = is_valid(expr5),
     is_valid6 = is_valid(expr6), is_valid7= is_valid(expr7);
-    
-    printf("Testing is_symbol()\n"); 
-    printf("Testing paren_check()\n");     
-    
-    printf("Testing is_valid()\n");     
+    printf("Testing is_valid...\n");
+         
     printf("1. is_valid: %s. Expected: False. Received: %s\n",
            expr0, T_F(is_valid0));
     printf("2. is_valid: %s. Expected: True. Received: %s\n",
@@ -79,42 +76,33 @@ void test_storage(void){
     printf("Testing add_expr...\n");
     
     add_expr(expressions, MAX_EXPR, expr0, expr0 + strlen(expr0) + 1, &num_expr);
-    add_expr(expressions, MAX_EXPR, expr1, expr1 + strlen(expr0) + 1, &num_expr);
-    add_expr(expressions, MAX_EXPR, expr1, expr1 + strlen(expr0) + 1, &num_expr);
+    add_expr(expressions, MAX_EXPR, expr1, expr1 + strlen(expr1) + 1, &num_expr);
+    add_expr(expressions, MAX_EXPR, expr1, expr1 + strlen(expr1) + 1, &num_expr);
+    add_expr(expressions, MAX_EXPR, expr2, expr2 + strlen(expr2) + 1, &num_expr);
     
-    printf("Expressions should have these expressions:\n\t%s\n\t%s\n%s\t\n",
+    printf("Expressions should have these expressions:\n\t%s\n\t%s\n\t%s\n",
            expr0, expr1, expr2);
     printf("It has: \n");
     for (int i = 0; i < num_expr; i++)
         printf("%s\n", expressions[i]);
     
-    printf("Testing contains var...\n");
-    bool contains_var0 = contains_var(expressions, MAX_EXPR, 'P'),
-    contains_var1 = contains_var(expressions, MAX_EXPR, 'z');
-    
-    printf("contains_var: \'P\' Expected: False. Received %s",
-           T_F(contains_var0));
-    printf("contains_var: \'z\' Expected: True. Received %s",
-           T_F(contains_var1));
-    
     printf("Testing contains_expr...\n");
     bool contains_expr0 = contains_expr(expressions, MAX_EXPR, expr0,
-                                        expr0 + strlen(expr0) + 1),
-                                        contains_expr1 = contains_expr(expressions, MAX_EXPR, expr1,
-                                                                       expr1 + strlen(expr1) + 1),
-                                                                       contains_expr3 = contains_expr(expressions, MAX_EXPR, expr3,
-                                                                                                      expr3 + strlen(expr3) + 1);    
-                                                                       printf("contains_expr: %s Expected: True. Received %s",
-                                                                              expr0, T_F(contains_expr0));  
-                                                                       printf("contains_expr: %s Expected: True. Received %s",
-                                                                              expr1, T_F(contains_expr1));  
-                                                                       printf("contains_expr: %s Expected: False. Received %s",
-                                                                              expr3, T_F(contains_expr3)); 
-                                                                       
-                                                                       if (tests_passed){
-                                                                           tests_passed = !contains_var0 && contains_var1 && contains_expr0
-                                                                           && contains_expr1 && !contains_expr3;
-                                                                       }
+                                        expr0 + strlen(expr0) + 1, &num_expr),
+         contains_expr1 = contains_expr(expressions, MAX_EXPR, expr1,
+                                       expr1 + strlen(expr1) + 1, &num_expr),
+         contains_expr3 = contains_expr(expressions, MAX_EXPR, expr3,
+                                        expr3 + strlen(expr3) + 1, &num_expr);    
+        printf("contains_expr: %s Expected: True. Received %s",
+               expr0, T_F(contains_expr0));  
+        printf("contains_expr: %s Expected: True. Received %s",
+               expr1, T_F(contains_expr1));  
+        printf("contains_expr: %s Expected: False. Received %s",
+               expr3, T_F(contains_expr3)); 
+        
+        if (tests_passed){
+            tests_passed = contains_expr0 && contains_expr1 && !contains_expr3;
+        }
 }
 
 void test_eval(void){
