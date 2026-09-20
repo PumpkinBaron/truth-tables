@@ -119,13 +119,13 @@ void test_eval(void){
     bool is_var0 = (*find4 == '0') | (*find4 == '1'), 
     is_var1 = (*find5 == '0') | (*find5 == '1');
     
-    printf("Testing from %c and expecting %c... ", *(prep_expr0 + 15), *(prep_expr0 + 21)); 
-    printf("Settled on %c. Expected: True. Received: %s\n",
-           *find4, T_F(is_valid_loc4));
+    printf("Testing from %s and expecting %s... ", (prep_expr0 + 15), (prep_expr0 + 21)); 
+    printf("Settled on %s. Expected: True. Received: %s\n",
+           find4, T_F(is_valid_loc4));
     
-    printf("Testing find_right_para from %c...\n", *prep_expr2); 
-    printf("Settled on %c. Expected: True. Received: %s\n",
-           *find5, T_F(is_valid_loc5));
+    printf("Testing from %s...\n", *prep_expr2); 
+    printf("Settled on %s. Expected: True. Received: %s\n",
+           find5, T_F(is_valid_loc5));
     
     puts("--------------------------------");
     printf("Testing find_and_start...\n");
