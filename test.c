@@ -18,7 +18,8 @@ void test_eval(void);
 void test_storage(void);
 
 bool run_tests(void){    
-    printf("Running tests... "); 
+    puts("--------------------------------");
+    printf("Running tests...\n"); 
     test_validation();
     test_eval();
     test_storage();
@@ -44,6 +45,7 @@ void test_validation(void){
     is_valid2 = is_valid(expr2), is_valid3 = is_valid(expr3), 
     is_valid4 = is_valid(expr4), is_valid5 = is_valid(expr5),
     is_valid6 = is_valid(expr6), is_valid7= is_valid(expr7);
+    puts("--------------------------------");
     printf("Testing is_valid...\n");
          
     printf("1. is_valid: %s. Expected: False. Received: %s\n",
@@ -79,36 +81,36 @@ void test_eval(void){
     char_vals['D' - 65] = true;
     char_vals['Z' - 65] = true;
     
+    puts("--------------------------------");   
     printf("Testing find_right_para...\n");
     char *find0 = find_right_para(expr0 + 15, expr0 + strlen(expr0));
-    char *find1 = find_right_para(expr0 + 15, expr0 + strlen(expr0));
-    bool is_valid_loc0 = find0 == expr0 + strlen(expr0);
-    bool is_valid_loc1 = find1 == expr0 + strlen(expr0) - 1;
-    bool is_right_para0 = *find0 == ')', is_right_para1 = *find1 == ')';
+    char *find1 = find_right_para(expr0 + 13, expr0 + strlen(expr0));
+    bool is_valid_loc0 = find0 == (expr0 + strlen(expr0) - 2);
+    bool is_valid_loc1 = find1 == (expr0 + strlen(expr0) - 1);
+    bool is_right_para0 = *find0 == ')', is_right_para1 = *find1 == ')'; 
+    printf("Testing from %ld... ", (long int) expr0 + 15); 
+    printf("Settled on %ld. Test Passed: %s\n",
+            (long int) find0, T_F(is_valid_loc0));
     
-    printf("Testing from %c... ", expr0[15]); 
-    printf("Settled on %c. Expected: True. Received: %s\n",
-           *find0, T_F(is_valid_loc0));
+    printf("Testing from %ld... ", (long int) expr0 + 13); 
+    printf("Settled on %ld. Test Passed: %s\n",
+            (long int) find1, T_F(is_valid_loc1));
     
-    printf("Testing find_right_para from %c...\n", expr0[21]); 
-    printf("Settled on %c. Expected: True. Received: %s\n",
-           *find1, T_F(is_valid_loc1));
-    
+    puts("--------------------------------");
     printf("Testing find_left_para...\n");
-    char *find2 = find_left_para(expr0 + 15, expr0 + strlen(expr0));
-    char *find3 = find_left_para(expr0 + strlen(expr0), expr0 + 15);
-    bool is_valid_loc2 = find2 == expr0 + strlen(expr0);
-    bool is_valid_loc3 = find3 == expr0 + strlen(expr0) - 1;
+    char *find2 = find_left_para(expr0, expr0 + 15);
+    char *find3 = find_left_para(expr0, expr2 + 20);
+    bool is_valid_loc2 = find2 == expr0 + 14;
+    bool is_valid_loc3 = find3 == expr2 + 6;
     bool is_left_para0 = *find0 == '(', is_left_para1 = *find1 == '(';
     
-    printf("Testing from %c... ", *(expr0 + 15)); 
-    printf("Settled on %c. Expected: True. Received: %s\n",
-           *find2, T_F(is_valid_loc2));
+    printf("Testing from %ld... ", (long int)  (expr0 + 15)); 
+    printf("Settled on %ld. Test Passed: %s\n", (long int) find2, T_F(is_valid_loc2));
     
-    printf("Testing find_right_para from %c...\n", *(expr0 + strlen(expr0))); 
-    printf("Settled on %c. Expected: True. Received: %s\n",
-           *find3, T_F(is_valid_loc3));
+    printf("Testing from %ld... ", (long int) expr2 + 20); 
+    printf("Settled on %ld. Test Passed: %s\n", (long int) find3, T_F(is_valid_loc3));
     
+    puts("--------------------------------");
     printf("Testing find_next_var...\n");
     char *find4 = find_next_var(prep_expr0 + 15, prep_expr0 + strlen(expr0));
     char *find5 = find_next_var(prep_expr2, prep_expr2 + strlen(expr2));
@@ -117,7 +119,7 @@ void test_eval(void){
     bool is_var0 = (*find4 == '0') | (*find4 == '1'), 
     is_var1 = (*find5 == '0') | (*find5 == '1');
     
-    printf("Testing from %c... ", *(prep_expr0 + 15)); 
+    printf("Testing from %c and expecting %c... ", *(prep_expr0 + 15), *(prep_expr0 + 21)); 
     printf("Settled on %c. Expected: True. Received: %s\n",
            *find4, T_F(is_valid_loc4));
     
@@ -125,6 +127,7 @@ void test_eval(void){
     printf("Settled on %c. Expected: True. Received: %s\n",
            *find5, T_F(is_valid_loc5));
     
+    puts("--------------------------------");
     printf("Testing find_and_start...\n");
     char *find6 = find_and_start(prep_expr2, 
                                  prep_expr2 + strlen(prep_expr2));
@@ -141,6 +144,7 @@ void test_eval(void){
     printf("Settled on %c. Expected: True. Received: %s\n",
            *find7, T_F(is_valid_loc7));
     
+    puts("--------------------------------");
     printf("Testing run_expr...\n");
     char expr4[] = "~P & ~(P | (A | Q) | P & Q & ~Q | Z | (P & (A & Q))";
     printf("Expression was [%s] and now is ", expr4);

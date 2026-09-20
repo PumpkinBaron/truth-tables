@@ -33,13 +33,13 @@ char *find_right_para(char *cur, char *end){
 
 char *find_left_para(char *start, char *cur){
     int right_para = 0;
-    while (cur-- >= start){
-        if (*cur == ')')
+    for (char *p = cur; p >= start; p--){
+        if (*p == ')')
             right_para++;
-        if (*cur == '(')
+        if (*p == '(')
             right_para--;
         if (right_para < 0)
-            return cur;
+            return p;
     }
     printf("Failed to find left parenthesis.\n");
     exit(EXIT_FAILURE);
