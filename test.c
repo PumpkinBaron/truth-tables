@@ -37,22 +37,34 @@ bool run_tests(void){
 }
 
 void test_validation(void){
-    bool is_valid0 = is_valid("hello"), is_valid1 = is_valid("B & ~~~~C"), is_valid2 = is_valid("B&&C"),
-    is_valid3 = "A & B & C || D", is_valid4 = is_valid("A & B & C | D"), is_valid5 = is_valid("A | B & (A | (C | (D & B)))"),
-    is_valid6 = is_valid("A | B & (A | (C | ((D & B))"), is_valid7= is_valid("A | B & (A | (C |) ((D & B))))");
+    char *expr0 = "hello", *expr1 = "B&~~~~C", *expr2 = "B&&C",
+    *expr3 = "A&B&C||D", *expr4 = "A&B&C|D", *expr5 = "A|B&(A|(C|(D&B)))",
+    *expr6 = "A|B&(A|(C|((D&B))", *expr7 = "A|B&(A|(C|)((D&B))))";
+    bool is_valid0 = is_valid(expr0), is_valid1 = is_valid(expr1),
+    is_valid2 = is_valid(expr2), is_valid3 = is_valid(expr3), 
+    is_valid4 = is_valid(expr4), is_valid5 = is_valid(expr5),
+    is_valid6 = is_valid(expr6), is_valid7= is_valid(expr7);
     
     printf("Testing is_symbol()\n"); 
     printf("Testing paren_check()\n");     
     
     printf("Testing is_valid()\n");     
-    printf("is_valid: \"hello\". Expected: False. Received: %s\n", T_F(is_valid0));
-    printf("is_valid: \"B & ~~~~C\" Expected: True. Received: %s\n", T_F(is_valid1));
-    printf("is_valid: \"B&&C\". Expected: False. Received: %s\n", T_F(is_valid2));
-    printf("is_valid: \"A & B & C || D\". Expected: False. Received: %s\n", T_F(is_valid3));
-    printf("is_valid: \"A & B & C | D\". Expected: True. Received: %s\n", T_F(is_valid4));
-    printf("is_valid: \"A | B & (A | (C | (D & B)))\". Expected: True. Received: %s\n", T_F(is_valid5));
-    printf("is_valid: \"A | B & (A | (C | ((D & B)\". Expected: False. Received: %s\n", T_F(is_valid6));
-    printf("is_valid: \"A | B & (A | (C |) ((D & B))))\". Expected: False. Received: %s\n", T_F(is_valid7));
+    printf("1. is_valid: %s. Expected: False. Received: %s\n",
+           expr0, T_F(is_valid0));
+    printf("2. is_valid: %s. Expected: True. Received: %s\n",
+           expr1, T_F(is_valid1));
+    printf("3. is_valid: %s. Expected: False. Received: %s\n",
+           expr2, T_F(is_valid2));
+    printf("4. is_valid: %s. Expected: False. Received: %s\n",
+           expr3, T_F(is_valid3));
+    printf("5. is_valid: %s. Expected: True. Received: %s\n",
+           expr4, T_F(is_valid4));
+    printf("6. is_valid: %s. Expected: True. Received: %s\n",
+           expr5, T_F(is_valid5));
+    printf("7. is_valid: %s. Expected: False. Received: %s\n",
+           expr6, T_F(is_valid6));
+    printf("8. is_valid: %s. Expected: False. Received: %s\n",
+           expr7, T_F(is_valid7));
     
     if (tests_passed)
         tests_passed = !is_valid0 && is_valid1 && !is_valid2 && !is_valid3 && is_valid4 && is_valid5 && !is_valid6 && !is_valid7;

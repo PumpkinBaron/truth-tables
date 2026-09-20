@@ -26,14 +26,16 @@ int main(int argc, char * argv[]){
     int num_vars, actv_vars[26];
     bool char_vals[26];
     
+    // Error checks
+    if (argc != 2){
+        printf("Correct usage: %s [expression], where the expression has no spaces.\n",
+               argv[0]);
+        exit(EXIT_FAILURE);
+    }
+        
     if (TEST_ON)
         run_tests();
-    
-    // Error checks
-    if (argc != 2)
-        printf("Correct usage: %s [expression], where the expression has no spaces.",
-               argv[0]);
-    
+   
     is_valid(argv[1]);
     
     // Register variables

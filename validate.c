@@ -24,8 +24,7 @@ void paren_check(char c){
             else 
                 parentheses--;
             break;
-    }
-    printf("Current parenthesis: %d\n", parentheses);
+    } 
 }
 
 bool is_symbol(char c){
