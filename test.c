@@ -14,14 +14,14 @@
 bool tests_passed = true;
 
 void test_validation(void);
-void test_storage(void);
 void test_eval(void);
+void test_storage(void);
 
 bool run_tests(void){    
     printf("Running tests... "); 
     test_validation();
-    test_storage();
     test_eval();
+    test_storage();
     
     if (tests_passed)
         printf("Tests successful! Starting program...\n");
@@ -66,43 +66,6 @@ void test_validation(void){
     if (tests_passed)
         tests_passed = !is_valid0 && is_valid1 && !is_valid2 && !is_valid3 && is_valid4 && is_valid5 && !is_valid6 && !is_valid7;
     
-}
-
-void test_storage(void){
-    int num_expr = 0;
-    char *expressions[MAX_EXPR], *expr0 = "this is an expression",
-    *expr1 = "A & B | C (A & ~D)", *expr2 = "z", *expr3 = "Elephant";
-    
-    printf("Testing add_expr...\n");
-    
-    add_expr(expressions, MAX_EXPR, expr0, expr0 + strlen(expr0) + 1, &num_expr);
-    add_expr(expressions, MAX_EXPR, expr1, expr1 + strlen(expr1) + 1, &num_expr);
-    add_expr(expressions, MAX_EXPR, expr1, expr1 + strlen(expr1) + 1, &num_expr);
-    add_expr(expressions, MAX_EXPR, expr2, expr2 + strlen(expr2) + 1, &num_expr);
-    
-    printf("Expressions should have these expressions:\n\t%s\n\t%s\n\t%s\n",
-           expr0, expr1, expr2);
-    printf("It has: \n");
-    for (int i = 0; i < num_expr; i++)
-        printf("%s\n", expressions[i]);
-    
-    printf("Testing contains_expr...\n");
-    bool contains_expr0 = contains_expr(expressions, MAX_EXPR, expr0,
-                                        expr0 + strlen(expr0) + 1, &num_expr),
-         contains_expr1 = contains_expr(expressions, MAX_EXPR, expr1,
-                                       expr1 + strlen(expr1) + 1, &num_expr),
-         contains_expr3 = contains_expr(expressions, MAX_EXPR, expr3,
-                                        expr3 + strlen(expr3) + 1, &num_expr);    
-        printf("contains_expr: %s Expected: True. Received %s",
-               expr0, T_F(contains_expr0));  
-        printf("contains_expr: %s Expected: True. Received %s",
-               expr1, T_F(contains_expr1));  
-        printf("contains_expr: %s Expected: False. Received %s",
-               expr3, T_F(contains_expr3)); 
-        
-        if (tests_passed){
-            tests_passed = contains_expr0 && contains_expr1 && !contains_expr3;
-        }
 }
 
 void test_eval(void){
@@ -190,4 +153,53 @@ void test_eval(void){
         is_valid_loc7 && is_right_para0 && is_right_para1 && is_left_para0 &&
         is_left_para1 && is_var0 && is_var1 & is_and0 && is_and1;
     
+}
+
+void test_storage(void){
+    int num_expr = 0;
+    char *expressions0[MAX_EXPR], expressions1[MAX_EXPR], 
+    *expr0 = "this is an expression", *expr1 = "A & B | C (A & ~D)", 
+    *expr2 = "z", *expr3 = "Elephant",
+    *expr4 = "~P & ~(P | (A | Q) | P & Q & ~Q | Z | (P & (A & Q))";
+    
+    printf("Testing contains_expr...\n");
+    bool contains_expr0 = contains_expr(expressions0, MAX_EXPR, expr0,
+                                        expr0 + strlen(expr0) + 1, &num_expr),
+    contains_expr1 = contains_expr(expressions0, MAX_EXPR, expr1,
+                                   expr1 + strlen(expr1) + 1, &num_expr),
+    contains_expr3 = contains_expr(expressions0, MAX_EXPR, expr3,
+                                   expr3 + strlen(expr3) + 1, &num_expr);    
+    printf("contains_expr: %s Expected: True. Received %s\n",
+           expr0, T_F(contains_expr0));  
+    printf("contains_expr: %s Expected: True. Received %s\n",
+           expr1, T_F(contains_expr1));  
+    printf("contains_expr: %s Expected: False. Received %s\n",
+           expr3, T_F(contains_expr3)); 
+    
+    printf("Testing add_expr...\n");        
+    add_expr(expressions0, MAX_EXPR, expr0, expr0 + strlen(expr0) + 1, &num_expr);
+    add_expr(expressions0, MAX_EXPR, expr1, expr1 + strlen(expr1) + 1, &num_expr);
+    add_expr(expressions0, MAX_EXPR, expr1, expr1 + strlen(expr1) + 1, &num_expr);
+    add_expr(expressions0, MAX_EXPR, expr2, expr2 + strlen(expr2) + 1, &num_expr);
+    
+    printf("Expressions should have these expressions:\n\t%s\n\t%s\n\t%s\n",
+           expr0, expr1, expr2);
+    printf("It has: \n");
+    for (int i = 0; i < num_expr; i++)
+        printf("\t%s\n", expressions0[i]);     
+
+    // This is dependent on test_eval passing.    
+    //    printf("Testing store_expressions...\n");
+    //    num_expr = 0;
+    //    int char_count = store_expressions((char **) expressions1, MAX_EXPR, expr4, (char *) strlen(expr4) + 1, &num_expr, 0);
+    
+    //    printf("Expressions1 should have these expressions:\n\t%s\n\t%s\n\t%s\n",
+    //           "fill in", "", "");
+    //    printf("It has: \n");
+    //    for (int i = 0; i < num_expr; i++)
+    //        printf("%s\n", expressions0[i]);
+    
+    if (tests_passed){
+        tests_passed = contains_expr0 && contains_expr1 && !contains_expr3;
+    }
 }

@@ -56,7 +56,7 @@ int main(int argc, char * argv[]){
 void print_table(char *expr, bool *char_vals, int *actv_vars, int num_vars, int num_lines){
     char *expressions[MAX_EXPR];
     int num_expr = num_vars, 
-    char_count = store_expressions(expressions, MAX_EXPR, expr, expr + strlen(expr), &num_expr);
+    char_count = store_expressions(expressions, MAX_EXPR, expr, expr + strlen(expr), &num_expr, 0);
     qsort(expressions, sizeof(expressions) / sizeof(char *), sizeof(char *), cmpr_expr);
     
     putchar(' ');
