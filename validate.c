@@ -2,13 +2,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
 
 #define MAX_LENGTH 1026
 
-bool nested_correctly = true, prev_was_symb = false,
-     consec_symb = false, prev_was_var = false, consec_var = false;
-int parentheses = 0; // left only
-char contents[MAX_LENGTH];
+bool nested_correctly = true;
+int parentheses = 0;
 
 void paren_check(char c);
 bool is_symbol(char c);
@@ -26,6 +25,7 @@ void paren_check(char c){
                 parentheses--;
             break;
     }
+    printf("Current parenthesis: %d\n", parentheses);
 }
 
 bool is_symbol(char c){
@@ -37,33 +37,39 @@ bool is_symbol(char c){
         case '|':
             is_symb = true;
             break;
-        case '~':
-            is_symb = true;
-            break;
     }
     return is_symb;
 }
 
 bool is_valid(char *expr){
-    char c = '\0'; 
-    
-    for (int i = 0; i < MAX_LENGTH && contents[i] != '\0' && nested_correctly; i++){
-        paren_check(contents[i]);
-        
-        if (is_symbol(contents[i])){
-            if (prev_was_symb)
-                consec_symb = true;
+    parentheses = 0;
+    for (char *p = expr; p <= expr + strlen(expr) - 1; p++){
+        while (*p == '(' || *p == ')'){
+            paren_check(*p);
+            p++;
         }
-        else
-            prev_was_symb = false;
+        char *prev = p - 1, *next = p + 1;
         
-        if (isalpha(contents[i])){
-            if (prev_was_var)
-                consec_var = true;
+        while (p != expr && *prev == '(' || *prev == ')')
+            prev--;
+        while (p != expr + strlen(expr) - 1 && *next == '(' || *next == ')')
+            next++;
+
+        if (is_symbol(*p) && 
+            (((p != expr) && is_symbol(*prev)) | 
+            ((p != expr + strlen(expr) - 1) && is_symbol(*next)))){
+            return false;
         }
-        else if (contents[i] != ' ')
-            prev_was_var = false;
+        if (isalpha(*p) && 
+            (((p != expr) && isalpha(*prev)) | 
+            ((p != expr + strlen(expr) - 1) && isalpha(*next)))){
+            return false;
+        }
+        paren_check(*p);
     }
-        
-    return nested_correctly && !consec_symb && !consec_var;
+    
+    if (parentheses != 0)
+        nested_correctly = false;
+    
+    return nested_correctly;
 }
