@@ -6,7 +6,15 @@ bool run_expr(char *expr, bool *char_vals, int len, int num_vars);
 char * find_right_para(char *expr, char *end);
 // Finds previous left parenthesis
 char * find_left_para(char *expr, char *cur);
-// Finds the earliest AND statements that's not in a higher 
-// level of parenthesis'
+// Finds the earliest AND statement that's not in a higher 
+// level of parentheses. It stops on the &.
 char *find_and_start(char *expr, char *cur);
+char *find_next_var(char *start, char *end);
+// included for testing
+bool eval_expr(char *expr, char *end);
+void eval_paren(char *expr, char *end, char *next_val);
+void eval_not(char *expr, char *end, char *next_val);
+void eval_or(char *expr, char *end, char *next_val);
+void eval_and(char *expr, char *end, char *next_val);
+
 char *find_next_var(char *start, char *end);

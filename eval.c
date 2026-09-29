@@ -13,12 +13,16 @@ char *find_left_para(char *start, char *cur);
 char *find_left_para(char *start, char *cur);
 char *find_next_var(char *start, char *end);
 bool within_and(char c);
-char *find_and_start(char *expr, char *cur);
+char *find_and_start(char *start, char *cur);
 bool run_expr(char *expr, bool *char_vals, int len, int num_vars);
 bool eval_expr(char *expr, char *end);
 
-char *find_right_para(char *cur, char *end){
+char *find_right_para(char *cur, char *end){ 
     int left_para = 0;
+
+    if (*cur == '(')
+        cur++;
+    
     for (char *p = cur; p <= end; p++){
         if (*p == '(')
             left_para++;
@@ -55,28 +59,36 @@ char *find_next_var(char *start, char *end){
 }
 
 bool within_and(char c){
-    return isalpha(c) | (c == '&') | (c == '(') | (c == ')') | (c == '~');
+    return c == '0' || c == '1' || c == '&' || c == '(' || c == ')' || c == '~';
  }
 
-char *find_and_start(char *expr, char *cur){
-    char *start;
+char *find_and_start(char *start, char *cur){
     int right_paras = 0;
-    while (cur-- != expr && within_and(*(cur -1))){
-        if (*cur == ')')
+    char *p;
+    for (p = cur; p != start && within_and(*(p - 1)); p--){
+        if (*p == ')')
             right_paras++;
-        if (*cur == '(')
+        if (*p == '(')
             right_paras--;
-        if (right_paras < 0)
+        if (right_paras < 0){
+         puts("para termination\n\n\n");
             break;
-        if (*cur == '&')
-            start = cur - 1;
+        }
     }
-    return start;
+    return p;
 }
 
 bool run_expr(char *expr, bool *char_vals, int len, int num_vars){
     char dup_expr[len + 1];
     strcpy(dup_expr, expr);
+    
+    // If the whole expression is in parenthesis, remove them.
+    if (*(expr + len - 1) == ')' && *expr == ')'){
+        dup_expr[len] = '\0';
+        dup_expr[0] = ' ';
+        len--;
+        expr++;
+    }
     
     // Replace variables with 1 or 0. 
     for (int i = 0; i < len; i++){
@@ -87,86 +99,102 @@ bool run_expr(char *expr, bool *char_vals, int len, int num_vars){
                 dup_expr[i] = '0';
         }
     }
-    return eval_expr(dup_expr, dup_expr + strlen(dup_expr));
+    
+    return eval_expr(dup_expr, dup_expr + len);
 }
 
 
+void eval_paren(char *expr, char *end, char *next_val){
+    char *right_para; 
+    for (char *p = expr; p <= end; p++){
+        if (*p == '('){
+            right_para = find_right_para(p, end);
+            *p = ' ';
+            *right_para = ' ';
+            eval_expr(++p, --right_para);
+        }
+    } 
+}
+
+
+void eval_not(char *expr, char *end, char *next_val){ 
+    for (char *p = expr; p <= end && *p != '\0'; p++){ 
+        
+        if (*p == '~') {
+            next_val = find_next_var(p, end);
+            *p = ' ';
+            if (*next_val == '1')
+                *next_val = '0';
+            else
+                *next_val = '1';
+        }
+    } 
+}
+
+
+void eval_and(char *expr, char *end, char *next_val){
+    bool prev_bool, found_op = false;
+    char *prev, *op; 
+    for (char *p = expr; p <= end; p++){ 
+        if (found_op && (*p == '1' || *p == '0')){
+            found_op = false;
+            *op = ' ';
+            if (*p == '0' || *prev == '0'){
+                *p = ' ';
+                *prev = '0';
+            } else {
+                *p = ' ';
+                *prev = '1';
+            }
+        }
+        if (*p == '&'){
+            found_op = true;
+            op = p;
+        } 
+        if (*p == '1' || *p == '0')
+            prev = p; 
+    }
+}
+
+
+void eval_or(char *expr, char *end, char *next_val){
+    bool prev_bool, found_op = false;
+    char *prev, *op; 
+    for (char *p = expr; p <= end; p++){ 
+        if (found_op && (*p == '1' || *p == '0')){
+            found_op = false;
+            *op = ' ';
+            if (*p == '1' || *prev == '1'){
+                *p = ' ';
+                *prev = '1';
+            } else {
+                *p = ' ';
+                *prev = '0';
+            }
+        }
+        if (*p == '|'){
+            found_op = true;
+            op = p;
+        } 
+        if (*p == '1' || *p == '0')
+            prev = p; 
+    }
+}
+
+ 
 bool eval_expr(char *expr, char *end){
-    bool prev_bool, found_op;
-    int prev_ind, op_ind;
-    char *next_val, *prev, *op; 
+    char *next_val; 
     if (*expr == '('){
         *expr = ' ';
         *end = ' ';
     }
-    // Evaluates expressions inside parenthesis
-    for (char *p = expr; p <= end; p++){
-        if (*p == '('){
-            char *right_para = find_right_para(p, end);
-            eval_expr(expr, right_para);
-        }
-    }
-    // Applies NOT
-    for (char *p = expr; p <= end; p++){
-        if (*p == '~') {
-            next_val = find_next_var(p, end);
-            if (*next_val == '0')
-                *next_val = '1';
-            else if (*next_val == '1')
-                *next_val = '1';
-        }
-    }
     
-    // Evaluates & and |
-    for (char *p = expr; p <= end; p++){
-        if (*p == '0'){
-            if (found_op){
-                found_op = false;
-                *p = ' ';
-                if (*op == '&'){
-                    expr[prev_ind] = '0';
-                    prev_bool = false;
-                }
-                else if (*op == '|'){
-                    if (prev_bool)
-                        expr[prev_ind] = '1';
-                    else {
-                        expr[prev_ind] = '0';
-                        prev_bool = false;
-                    }
-                }
-                *op = ' ';
-            } else {
-                prev = p;
-                prev_bool = false;
-            }
-        }
-        if (*p == '1'){
-            if (found_op){
-                found_op = false;
-                *p = ' ';
-                if (*op == '&')
-                    if (prev_bool)
-                        *p = '1';
-                    else {
-                        *p = '0';
-                        prev_bool = false;
-                    }
-                else if (*op == '|'){
-                    *p = '1';
-                    prev_bool = true;
-                }
-                *op = ' ';
-            } else {
-                prev = p;
-                prev_bool = true;
-            }
-        }
-        if (*p == '&' | *p == '|'){
-            found_op = true;
-            op = p;
-        }
-    }
+    eval_paren(expr, end, next_val);
+    eval_not(expr, end, next_val);
+    eval_and(expr, end, next_val); 
+    eval_or(expr, end, next_val);  
+      
+    
     if (*find_next_var(expr, end) == '1')
         return true;
     return false;

@@ -14,14 +14,16 @@
 bool tests_passed = true;
 
 void test_validation(void);
-void test_eval(void);
+void test_eval_one(void);
+void test_eval_two(void);
 void test_storage(void);
 
 bool run_tests(void){    
     puts("--------------------------------");
     printf("Running tests...\n"); 
     test_validation();
-    test_eval();
+    test_eval_one();
+    test_eval_two();
     test_storage();
     
     if (tests_passed)
@@ -45,6 +47,7 @@ void test_validation(void){
     is_valid2 = is_valid(expr2), is_valid3 = is_valid(expr3), 
     is_valid4 = is_valid(expr4), is_valid5 = is_valid(expr5),
     is_valid6 = is_valid(expr6), is_valid7= is_valid(expr7);
+    puts("\n--------------------------------");
     puts("--------------------------------");
     printf("Testing is_valid...\n");
          
@@ -70,17 +73,14 @@ void test_validation(void){
     
 }
 
-void test_eval(void){
+void test_eval_one(void){
     char *expr0 = "P | Q | (P & ~(P | Q))", *expr1 = "A & B | C (A & ~D)", *expr2 = "~P & ~(P | (A | Q) | P & Q & ~Q | Z | (P & (A & Q))",
-    *prep_expr0 = "1 | 0 | (1 & ~(1 | 0))",
-    *prep_expr1 = "1 & 9 | 0 (1 & ~1)", 
-    *prep_expr2 = "~0 & ~(0 | 1 | 0) | 1 & 0 & ~0 | 1 | (1 & (1 & 0))";
-    bool char_vals[26] = {false};
-    char_vals['A' - 65] = true;
-    char_vals['P' - 65] = true;
-    char_vals['D' - 65] = true;
-    char_vals['Z' - 65] = true;
+    *prep_expr0 = "1|0|(1&~(1|0))",
+    *prep_expr1 = "1&0|0|(1&~1)", 
+    *prep_expr2 = "~0&~(0|1|0)|1&0&~0|1|(1&(1&0))",
+    *prep_expr3 = "1&0|0&1&0&1&0&1&0&1";
     
+    puts("\n--------------------------------");
     puts("--------------------------------");   
     printf("Testing find_right_para...\n");
     char *find0 = find_right_para(expr0 + 15, expr0 + strlen(expr0));
@@ -112,51 +112,129 @@ void test_eval(void){
     
     puts("--------------------------------");
     printf("Testing find_next_var...\n");
-    char *find4 = find_next_var(prep_expr0 + 15, prep_expr0 + strlen(expr0));
-    char *find5 = find_next_var(prep_expr2, prep_expr2 + strlen(expr2));
-    bool is_valid_loc4 = find4 == prep_expr0 + 21;
-    bool is_valid_loc5 = find5 == prep_expr2;
+    char *find4 = find_next_var(prep_expr0 + 16, prep_expr0 + strlen(expr0));
+    char *find5 = find_next_var(prep_expr2, prep_expr2 + strlen(expr2) - 4);
+    bool is_valid_loc4 = find4 == prep_expr0 + 19;
+    bool is_valid_loc5 = find5 == prep_expr2 + 1;
     bool is_var0 = (*find4 == '0') | (*find4 == '1'), 
     is_var1 = (*find5 == '0') | (*find5 == '1');
     
-    printf("Testing from %s and expecting %s... ", (prep_expr0 + 15), (prep_expr0 + 21)); 
-    printf("Settled on %s. Expected: True. Received: %s\n",
-           find4, T_F(is_valid_loc4));
+    printf("Testing from %ld... ", (long int) prep_expr0 + 16); 
+    printf("Settled on %ld. Expected: True. Received: %s\n", (long int) find4, T_F(is_valid_loc4));
     
-    printf("Testing from %s...\n", *prep_expr2); 
-    printf("Settled on %s. Expected: True. Received: %s\n",
-           find5, T_F(is_valid_loc5));
+    printf("Testing from %ld...\n", (long int) prep_expr2); 
+    printf("Settled on %ld. Expected: True. Received: %s\n", (long int) find5, T_F(is_valid_loc5));
     
     puts("--------------------------------");
     printf("Testing find_and_start...\n");
-    char *find6 = find_and_start(prep_expr2, 
-                                 prep_expr2 + strlen(prep_expr2));
-    char *find7 = find_and_start(prep_expr1, prep_expr1 + 5);
-    bool is_valid_loc6 = find6 == expr0 + 23;
-    bool is_valid_loc7 = find7 == expr0 + 3;
-    bool is_and0 = *find6 == '&', is_and1 = *find1 == '&';
+    puts(prep_expr3 + strlen(prep_expr3) - 2);
+    char *find6 = find_and_start(prep_expr2, prep_expr2 + 17);
+    char *find7 = find_and_start(prep_expr1, prep_expr1 + 8);
+    char *find8 = find_and_start(prep_expr3, prep_expr3 + strlen(prep_expr3)-2);
+    bool is_valid_loc6 = find6 == prep_expr2 + 14;
+    bool is_valid_loc7 = find7 == prep_expr1 + 6;
+    bool is_valid_loc8 = find8 == prep_expr3 + 4;
     
-    printf("Testing from %c... ", *(prep_expr2 + strlen(prep_expr2))); 
-    printf("Settled on %c. Expected: True. Received: %s\n",
-           *find6, T_F(is_valid_loc6));
+    printf("Testing from %s... ", prep_expr2 + 17   ); 
+    printf("Settled on %s. Expected: True. Received: %s\n",
+           find6, T_F(is_valid_loc6));
     
-    printf("Testing find_right_para from %c...\n", *(prep_expr1 + 5)); 
-    printf("Settled on %c. Expected: True. Received: %s\n",
-           *find7, T_F(is_valid_loc7));
+    printf("Testing %s from %s...\n", prep_expr1, prep_expr1 + 8); 
+    printf("Settled on %s. Expected: True. Received: %s\n",
+           find7, T_F(is_valid_loc7));
     
-    puts("--------------------------------");
-    printf("Testing run_expr...\n");
-    char expr4[] = "~P & ~(P | (A | Q) | P & Q & ~Q | Z | (P & (A & Q))";
-    printf("Expression was [%s] and now is ", expr4);
-    run_expr(expr4, char_vals, strlen(expr4), 4);
-    printf("[%s].\n", expr4);
+    
+    printf("Testing %s from %s...\n", prep_expr3, prep_expr3 + 4); 
+    printf("Settled on %s. Expected: True. Received: %s\n",
+           find8, T_F(is_valid_loc8));
+    
     
     if (tests_passed) 
         tests_passed = is_valid_loc0 && is_valid_loc1 && is_valid_loc2 &&
         is_valid_loc3 && is_valid_loc4 && is_valid_loc5 && is_valid_loc6 &&
         is_valid_loc7 && is_right_para0 && is_right_para1 && is_left_para0 &&
-        is_left_para1 && is_var0 && is_var1 & is_and0 && is_and1;
+        is_left_para1 && is_var0 && is_var1;
     
+}
+
+void test_eval_two(void){
+    bool char_vals[26] = {false};
+    char_vals['A' - 65] = true;
+    char_vals['P' - 65] = true;
+    char_vals['D' - 65] = true;
+    char_vals['Z' - 65] = true;
+    char *next_val, 
+    prep_expr0[] = "1",
+    prep_expr1[] = "0",
+    prep_expr2[] = "~1",
+    prep_expr3[] = "~0", 
+    prep_expr4[] = "~1&0&0|1|1|~1&~0|~1", 
+    prep_expr5[] = "~0&~(0|1|0)|1&0&~0|1|(1&(1&0))",
+    prep_expr6[] = "1&0|0&1&0&1&0&1&0&1";
+    
+    puts("\n--------------------------------");
+    puts("--------------------------------");
+    printf("\nTesting find_next_var...\n");
+    
+    printf("Expecting 1, found %s\n", find_next_var(prep_expr2, prep_expr2 + 1));
+    printf("Expecting 0, found %s\n", find_next_var(prep_expr3, prep_expr3 + 1));
+    
+    puts("--------------------------------");
+    printf("Testing eval_not...\n");
+    printf("%s, %s, %s, %s, and (%s) became:\n", prep_expr0, prep_expr1, prep_expr2, prep_expr3, prep_expr4); 
+    eval_not(prep_expr0, prep_expr0 + strlen(prep_expr0), next_val);
+    eval_not(prep_expr1, prep_expr1 + strlen(prep_expr1), next_val);
+    eval_not(prep_expr2, prep_expr2 + strlen(prep_expr2), next_val);
+    eval_not(prep_expr3, prep_expr3 + strlen(prep_expr3), next_val);
+    eval_not(prep_expr4, prep_expr4 + strlen(prep_expr4), next_val);
+    
+    printf("%s, %s, %s, %s, and (%s)\n", prep_expr0, prep_expr1, prep_expr2, prep_expr3, prep_expr4); 
+    
+    puts("--------------------------------");
+    printf("Testing eval_and...\n");  
+    
+    printf("%s, %s, %s, %s, and (%s) became:\n", prep_expr0, prep_expr1, prep_expr2, prep_expr3, prep_expr4); 
+    eval_and(prep_expr0, prep_expr0 + strlen(prep_expr0), next_val);
+    eval_and(prep_expr1, prep_expr1 + strlen(prep_expr1), next_val);
+    eval_and(prep_expr2, prep_expr2 + strlen(prep_expr2), next_val);
+    eval_and(prep_expr3, prep_expr3 + strlen(prep_expr3), next_val);
+    eval_and(prep_expr4, prep_expr4 + strlen(prep_expr4), next_val);
+    printf("%s, %s, %s, %s, and (%s)\n", prep_expr0, prep_expr1, prep_expr2, prep_expr3, prep_expr4); 
+    
+    
+    puts("--------------------------------");
+    printf("Testing eval_or...\n");  
+    printf("%s, %s, %s, %s, and (%s) became:\n", prep_expr0, prep_expr1, prep_expr2, prep_expr3, prep_expr4); 
+    eval_or(prep_expr0, prep_expr0 + strlen(prep_expr0), next_val);
+    eval_or(prep_expr1, prep_expr1 + strlen(prep_expr1), next_val);
+    eval_or(prep_expr2, prep_expr2 + strlen(prep_expr2), next_val);
+    eval_or(prep_expr3, prep_expr3 + strlen(prep_expr3), next_val);
+    eval_or(prep_expr4, prep_expr4 + strlen(prep_expr4), next_val);
+    printf("%s, %s, %s, %s, and (%s)\n", prep_expr0, prep_expr1, prep_expr2, prep_expr3, prep_expr4); 
+    
+    puts("--------------------------------");
+    printf("Testing eval_paren...\n");
+    
+    printf("%s \nbecame: \n", prep_expr5); 
+    eval_paren(prep_expr5, prep_expr5 + strlen(prep_expr5), next_val);
+    puts(prep_expr5);
+    puts("--------------------------------");
+    printf("Testing eval_expr...\n");
+    strcpy(prep_expr4, "~1&0&0|1|1|~1&~0|~1"); 
+    strcpy(prep_expr5, "~0&~(0|1|0)|1&0&~0|1|(1&(1&0))");
+    strcpy(prep_expr6, "1&0|0&1&0&1&0&1&0&1");
+    
+    printf("\n\t[%s],\n \t[%s],\n \t[%s]\nBecame:\n", prep_expr4, prep_expr5, prep_expr6); 
+    eval_expr(prep_expr4, prep_expr4 + strlen(prep_expr4));
+    eval_expr(prep_expr5, prep_expr5 + strlen(prep_expr5));
+    eval_expr(prep_expr6, prep_expr6 + strlen(prep_expr6));
+    printf("\n\t[%s],\n \t[%s],\n \t[%s]\n", prep_expr4, prep_expr5, prep_expr6); 
+    
+    
+   puts("--------------------------------");
+    printf("Testing run_expr...\n");
+    char expr4[] = "~P&~(P|(A|Q))|P&Q&~Q|Z|(P&(A&Q))";
+    printf("\t%s\n was evaluated as %s", expr4, T_F(run_expr(expr4, char_vals, strlen(expr4), 4)));
 }
 
 void test_storage(void){
@@ -166,6 +244,8 @@ void test_storage(void){
     *expr2 = "z", *expr3 = "Elephant",
     *expr4 = "~P & ~(P | (A | Q) | P & Q & ~Q | Z | (P & (A & Q))";
     
+    puts("\n--------------------------------");
+    puts("--------------------------------");
     printf("Testing contains_expr...\n");
     bool contains_expr0 = contains_expr(expressions0, MAX_EXPR, expr0,
                                         expr0 + strlen(expr0) + 1, &num_expr),
