@@ -7,8 +7,7 @@ char * find_right_para(char *expr, char *end);
 // Finds previous left parenthesis
 char * find_left_para(char *expr, char *cur);
 // Finds the earliest AND statement that's not in a higher 
-// level of parentheses. It stops on the &.
-char *find_and_start(char *expr, char *cur);
+// level of parentheses. It stops on the &. 
 char *find_next_var(char *start, char *end);
 // included for testing
 bool eval_expr(char *expr, char *end);

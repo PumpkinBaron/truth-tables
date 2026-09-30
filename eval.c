@@ -13,17 +13,19 @@ char *find_left_para(char *start, char *cur);
 char *find_left_para(char *start, char *cur);
 char *find_next_var(char *start, char *end);
 bool within_and(char c);
-char *find_and_start(char *start, char *cur);
 bool run_expr(char *expr, bool *char_vals, int len, int num_vars);
 bool eval_expr(char *expr, char *end);
 
 char *find_right_para(char *cur, char *end){ 
     int left_para = 0;
-
+    
+    if (*cur == '~')
+        cur++;
+    
     if (*cur == '(')
         cur++;
     
-    for (char *p = cur; p <= end; p++){
+    for (char *p = cur; p <= end; p++){ 
         if (*p == '(')
             left_para++;
         if (*p == ')')
@@ -59,24 +61,8 @@ char *find_next_var(char *start, char *end){
 }
 
 bool within_and(char c){
-    return c == '0' || c == '1' || c == '&' || c == '(' || c == ')' || c == '~';
+    return isalpha(c) || c == '0' || c == '1' || c == '&' || c == '(' || c == ')' || c == '~' || c == ' ';
  }
-
-char *find_and_start(char *start, char *cur){
-    int right_paras = 0;
-    char *p;
-    for (p = cur; p != start && within_and(*(p - 1)); p--){
-        if (*p == ')')
-            right_paras++;
-        if (*p == '(')
-            right_paras--;
-        if (right_paras < 0){
-         puts("para termination\n\n\n");
-            break;
-        }
-    }
-    return p;
-}
 
 bool run_expr(char *expr, bool *char_vals, int len, int num_vars){
     char dup_expr[len + 1];
