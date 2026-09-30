@@ -5,17 +5,26 @@
 #include <ctype.h>
 #include "eval.h"
 
-bool contains_expr(char **expressions, int max_expr, char *expr, char *end, int *num_expr){ 
+bool contains_expr(char **expressions, int max_expr, char *expr, char *end, int *num_expr){
+    bool equal; 
+    
     if (!num_expr)
         return false;
     for (char **p = expressions; p < expressions + *num_expr; p++){
-        if (!strcmp(*p, expr))
-            return true;
+        for (char *q = expr, *r = *p; q <= end; q++, r++)
+            if (*q != *r)
+                break;
+            else 
+                if (q == end)
+                    return true;
     }
     return false;
 }
 int add_expr(char **expressions, int max_expr, char *expr, char *end, int *num_expr){
-    int len = end - expr; 
+    int len = end - expr + 1; 
+    char *new_expr = malloc(len + 1);
+    
+    
     
     if (contains_expr(expressions, max_expr, expr, end, num_expr)){
         return 0;
@@ -25,82 +34,117 @@ int add_expr(char **expressions, int max_expr, char *expr, char *end, int *num_e
         printf("Cannot add more than %d expressions.\n", max_expr);
         exit(EXIT_FAILURE);
     }
-    char *new_expr = malloc(len);
+     
     if (new_expr == NULL){
         printf("Insufficient memory.\n");
+        printf("Current expressions are:\n");
+        
+        for (int i = 0; i < *num_expr; i++)
+            puts(expressions[i]);
+        
         free(new_expr);
         exit(EXIT_FAILURE);
     }
-    for (char *p = new_expr, *q = expr; p <= new_expr + len; p++, q++)
-        *p = *q;
-    expressions[(*num_expr)++] = new_expr; 
+    
+    for (char *p = expr, *q = new_expr; p <= end; p++, q++)
+        *q = *p;
+    
+    new_expr[len] = '\0';
+    expressions[(*num_expr)++] = new_expr;  
     
     return end - expr;
 }
 
+char *get_next(char *expr, char *end){
+    for (char *p = expr + 1; p <= end; p++)
+        if (*p != ' ')
+            return p;
+    return end;
+}
+char *get_prev(char *start, char *cur){
+    for (char *p = cur- 1; p >= start; cur--)
+        if (*p != ' ')
+            return p;
+    return start;
+}
+
 int store_expressions(char **expressions, int max_expr, char *expr, char *end, int *num_expr, int char_count){
     // Adds variables, NOT statements, and statements in parethensis.
-    for (char *p = expr; *p != '\0'; p++){
+    for (char *p = expr; p <= end && *p != '\0'; p++){ 
         if (isalpha(*p)){
-            char var[2] = {*p, '\0'};
-            char_count += add_expr(expressions, max_expr, var, var + 1, num_expr);
-        } else if (*p == '~'){
-            if (*(p + 1) == '('){
-                char *end = find_right_para(p, p + strlen(expr));
+            char_count += add_expr(expressions, max_expr, p, p, num_expr); 
+        } else if (*p == '~'){ 
+            if (*get_next(p, end) == '('){ 
+                char *end = find_right_para(p, p + strlen(expr)); 
                 char_count += store_expressions(expressions, max_expr, p + 1, end, num_expr, char_count);
-                if (!contains_expr(expressions, max_expr, p, end, num_expr)){
-                    char_count += add_expr(expressions, max_expr, p, end, num_expr);
-                }
-                p = end - 1;
-            } else if (isalpha(*(p + 1))){
-                char_count += add_expr(expressions, max_expr, p, p + 1, num_expr);
-                p += 1;
+            } else if (isalpha(*get_next(p, end))){
+                char_count += add_expr(expressions, max_expr, p, get_next(p, end), num_expr);
             } else {
                 printf("Error: store_expressions tried to apply "
-                "NOT to an incompatible character.\n");
+                "NOT to incompatible character %c.\n", *p);
                 exit(EXIT_FAILURE);
+            }
+        } else {
+            if (*p == '('){
+                char *para = find_right_para(p, end);
+                add_expr(expressions, max_expr, p + 1, para - 1, num_expr);
             }
         } 
         
     }
+    
     // Add AND statements
-    for (char *p = expr; *p != '\0'; p++){
-        char *prev = p - 1;
-        if (*p++ == '&'){ 
-            if (*prev == ')'){
-                prev = find_left_para(expr, p);
-                if (prev != expr && *(prev - 1) == '~')
-                    // Include the NOT before the '('
-                    prev--;
+    for (char *prev, *cur, *p = expr; p <= end && *p != '\0'; p++){  
+        if (*p == '&'){  
+            // Find the start of the and expression
+            for (cur = p, prev = p; cur >= expr && (*cur == ' ' || *cur == '&' || *cur == '(' || *cur == ')' || *cur == '~' || isalpha(*cur)); cur--){
+                if (isalpha(*cur) || *cur == '(' || *cur == '~')
+                    prev = cur;
             }
-            if (*p == '('){
-                // Include the expression inside the parethensis
-                p = find_right_para(p + 1, end);
+            
+            // Find the end of the and expression
+            for (char *q = p; q <= end && (*q == '&' || *q == ' ' || *q == '(' || *q == ')' || *q == '~' || isalpha(*q)); q++)
+                if (*q != ' ')
+                    p = q;
+            
+            if (*end == '~')
+                p = get_next(p, end);
+            
+            // If the end entered a parentheses, go to the end
+            if (p >= expr && *get_prev(expr, p) == '('){
+                while (p >= expr && *get_prev(expr, p) == '(')
+                    p = get_prev(expr, p);
+                p = find_right_para(p, end);
             }
-            if (prev != expr){
-                prev = find_and_start(expr, p);
+            char_count += add_expr(expressions, max_expr, prev, p, num_expr); 
+        }
+    }   // Add OR statements
+    for (char *prev, *cur, *p = expr; p <= end && *p != '\0'; p++){  
+        if (*p == '|'){  
+            // Find the start of the and expression
+            for (cur = p, prev = p; cur >= expr && (*cur == ' ' || *cur == '&' || 
+                *cur == '(' || *cur == ')' || *cur == '~' || *cur == '|' ||
+                isalpha(*cur)); cur--){
+                if (isalpha(*cur) || *cur == '(' || *cur == '~')
+                    prev = cur;
             }
-          char_count += add_expr(expressions, max_expr, prev, p, num_expr);
-        }                
-    }
-    // Add OR statements
-    for (char *p = expr; *p != '\0'; p++){
-        char *prev = p - 1;
-        if (*p++ == '|'){ 
-            if (*prev == ')'){
-                prev = find_left_para(expr, p);
-                if (prev != expr && *(prev - 1) == '~')
-                    // Include the NOT before the '('
-                    prev--;
+            
+            // Find the end of the and expression
+            for (char *q = p; q <= end && (*q == '&' || *q == ' ' || *q == '(' || *q == ')' || 
+                *q == '~' || *q == '|' || isalpha(*q)); q++)
+                if (*q != ' ')
+                    p = q;
+            
+            if (*end == '~')
+                p = get_next(p, end);
+            
+            // If the end entered a parentheses, go to the end
+            if (p >= expr && *get_prev(expr, p) == '('){
+                while (p >= expr && *get_prev(expr, p) == '(')
+                    p = get_prev(expr, p);
+                p = find_right_para(p, end);
             }
-            if (*p == '('){
-                // Include the expression inside the parethensis
-                p = find_right_para(p + 1, end);
-            }
-            if (prev != expr){
-                prev = find_and_start(expr, p);
-            }
-              char_count += add_expr(expressions, max_expr, prev, p, num_expr);
+            char_count += add_expr(expressions, max_expr, prev, p, num_expr); 
         }
     }
     return char_count;

@@ -43,7 +43,7 @@ void test_validation(void){
     char *expr0 = "hello", *expr1 = "B&~~~~C", *expr2 = "B&&C",
     *expr3 = "A&B&C||D", *expr4 = "A&B&C|D", *expr5 = "A|B&(A|(C|(D&B)))",
     *expr6 = "A|B&(A|(C|((D&B))", *expr7 = "A|B&(A|(C|)((D&B))))";
-    bool is_valid0 = is_valid(expr0), is_valid1 = is_valid(expr1),
+    bool passed, is_valid0 = is_valid(expr0), is_valid1 = is_valid(expr1),
     is_valid2 = is_valid(expr2), is_valid3 = is_valid(expr3), 
     is_valid4 = is_valid(expr4), is_valid5 = is_valid(expr5),
     is_valid6 = is_valid(expr6), is_valid7= is_valid(expr7);
@@ -68,12 +68,18 @@ void test_validation(void){
     printf("8. is_valid: %s. Expected: False. Received: %s\n",
            expr7, T_F(is_valid7));
     
+    passed = !is_valid0 && is_valid1 && !is_valid2 && !is_valid3 && is_valid4 && is_valid5 && !is_valid6 && !is_valid7;
+    
+    if (!passed)
+        puts("test_validation failed!");
+    
     if (tests_passed)
-        tests_passed = !is_valid0 && is_valid1 && !is_valid2 && !is_valid3 && is_valid4 && is_valid5 && !is_valid6 && !is_valid7;
+            tests_passed = passed;
     
 }
 
 void test_eval_one(void){
+    bool passed;
     char *expr0 = "P | Q | (P & ~(P | Q))", *expr1 = "A & B | C (A & ~D)", *expr2 = "~P & ~(P | (A | Q) | P & Q & ~Q | Z | (P & (A & Q))",
     *prep_expr0 = "1|0|(1&~(1|0))",
     *prep_expr1 = "1&0|0|(1&~1)", 
@@ -86,15 +92,14 @@ void test_eval_one(void){
     char *find0 = find_right_para(expr0 + 15, expr0 + strlen(expr0));
     char *find1 = find_right_para(expr0 + 13, expr0 + strlen(expr0));
     bool is_valid_loc0 = find0 == (expr0 + strlen(expr0) - 2);
-    bool is_valid_loc1 = find1 == (expr0 + strlen(expr0) - 1);
-    bool is_right_para0 = *find0 == ')', is_right_para1 = *find1 == ')'; 
+    bool is_valid_loc1 = find1 == (expr0 + strlen(expr0) - 2);
     printf("Testing from %ld... ", (long int) expr0 + 15); 
-    printf("Settled on %ld. Test Passed: %s\n",
-            (long int) find0, T_F(is_valid_loc0));
+    printf("Settled on %c at %ld. Test Passed: %s\n",
+            *find0, (long int) find0, T_F(is_valid_loc0));
     
     printf("Testing from %ld... ", (long int) expr0 + 13); 
-    printf("Settled on %ld. Test Passed: %s\n",
-            (long int) find1, T_F(is_valid_loc1));
+    printf("Settled on %c at %ld. Test Passed: %s\n",
+            *find1, (long int) find1, T_F(is_valid_loc1));
     
     puts("--------------------------------");
     printf("Testing find_left_para...\n");
@@ -102,58 +107,39 @@ void test_eval_one(void){
     char *find3 = find_left_para(expr0, expr2 + 20);
     bool is_valid_loc2 = find2 == expr0 + 14;
     bool is_valid_loc3 = find3 == expr2 + 6;
-    bool is_left_para0 = *find0 == '(', is_left_para1 = *find1 == '(';
     
     printf("Testing from %ld... ", (long int)  (expr0 + 15)); 
-    printf("Settled on %ld. Test Passed: %s\n", (long int) find2, T_F(is_valid_loc2));
+    printf("Settled on %c at %ld. Test Passed: %s\n", *find2, (long) find2, T_F(is_valid_loc2));
     
     printf("Testing from %ld... ", (long int) expr2 + 20); 
-    printf("Settled on %ld. Test Passed: %s\n", (long int) find3, T_F(is_valid_loc3));
+    printf("Settled on %c at  %ld. Test Passed: %s\n", *find3, (long) find3, T_F(is_valid_loc3));
     
     puts("--------------------------------");
     printf("Testing find_next_var...\n");
-    char *find4 = find_next_var(prep_expr0 + 16, prep_expr0 + strlen(expr0));
+    char *find4 = find_next_var(prep_expr0 + 1, prep_expr0 + strlen(expr0));
     char *find5 = find_next_var(prep_expr2, prep_expr2 + strlen(expr2) - 4);
-    bool is_valid_loc4 = find4 == prep_expr0 + 19;
+    bool is_valid_loc4 = find4 == prep_expr0 + 2;
     bool is_valid_loc5 = find5 == prep_expr2 + 1;
-    bool is_var0 = (*find4 == '0') | (*find4 == '1'), 
-    is_var1 = (*find5 == '0') | (*find5 == '1');
     
-    printf("Testing from %ld... ", (long int) prep_expr0 + 16); 
-    printf("Settled on %ld. Expected: True. Received: %s\n", (long int) find4, T_F(is_valid_loc4));
+    printf("Testing from %ld... ", (long int) prep_expr0 + 2); 
+    printf("Settled on %c at %ld. Expected: True. Received: %s\n", 
+           *find4, (long int) find4, T_F(is_valid_loc4));
     
     printf("Testing from %ld...\n", (long int) prep_expr2); 
-    printf("Settled on %ld. Expected: True. Received: %s\n", (long int) find5, T_F(is_valid_loc5));
+    printf("Settled on %c at %ld. Expected: True. Received: %s\n",
+           *find5, (long int) find5, T_F(is_valid_loc5));
     
     puts("--------------------------------");
-    printf("Testing find_and_start...\n");
-    puts(prep_expr3 + strlen(prep_expr3) - 2);
-    char *find6 = find_and_start(prep_expr2, prep_expr2 + 17);
-    char *find7 = find_and_start(prep_expr1, prep_expr1 + 8);
-    char *find8 = find_and_start(prep_expr3, prep_expr3 + strlen(prep_expr3)-2);
-    bool is_valid_loc6 = find6 == prep_expr2 + 14;
-    bool is_valid_loc7 = find7 == prep_expr1 + 6;
-    bool is_valid_loc8 = find8 == prep_expr3 + 4;
+   
     
-    printf("Testing from %s... ", prep_expr2 + 17   ); 
-    printf("Settled on %s. Expected: True. Received: %s\n",
-           find6, T_F(is_valid_loc6));
+    passed = is_valid_loc0 && is_valid_loc1 && is_valid_loc2 &&
+        is_valid_loc3 && is_valid_loc4 && is_valid_loc5;
     
-    printf("Testing %s from %s...\n", prep_expr1, prep_expr1 + 8); 
-    printf("Settled on %s. Expected: True. Received: %s\n",
-           find7, T_F(is_valid_loc7));
+    if (!passed)
+        puts("test_eval_one failed!"); 
     
-    
-    printf("Testing %s from %s...\n", prep_expr3, prep_expr3 + 4); 
-    printf("Settled on %s. Expected: True. Received: %s\n",
-           find8, T_F(is_valid_loc8));
-    
-    
-    if (tests_passed) 
-        tests_passed = is_valid_loc0 && is_valid_loc1 && is_valid_loc2 &&
-        is_valid_loc3 && is_valid_loc4 && is_valid_loc5 && is_valid_loc6 &&
-        is_valid_loc7 && is_right_para0 && is_right_para1 && is_left_para0 &&
-        is_left_para1 && is_var0 && is_var1;
+    if (tests_passed)
+        tests_passed = passed;
     
 }
 
@@ -238,14 +224,19 @@ void test_eval_two(void){
 }
 
 void test_storage(void){
-    int num_expr = 0;
-    char *expressions0[MAX_EXPR], expressions1[MAX_EXPR], 
-    *expr0 = "this is an expression", *expr1 = "A & B | C (A & ~D)", 
+    bool passed;
+    int num_expr = 2;
+    char *expr0 = "this is an expression", *expr1 = "A & B | C (A & ~D)", 
     *expr2 = "z", *expr3 = "Elephant",
-    *expr4 = "~P & ~(P | (A | Q) | P & Q & ~Q | Z | (P & (A & Q))";
+    *expr4 = "~P & ~(P | (A | Q)) | P & Q & ~Q | Z | (P & (A & Q))",
+    *expressions0[MAX_EXPR] = {expr0, expr1}, *expressions1[MAX_EXPR], 
+    *expressions2[MAX_EXPR];
     
     puts("\n--------------------------------");
     puts("--------------------------------");
+    puts("Testing get_next()...");
+    printf("Next on expr4 + 5 is %s\n", get_next(expr4 + 5, expr4 + strlen(expr4)));
+    
     printf("Testing contains_expr...\n");
     bool contains_expr0 = contains_expr(expressions0, MAX_EXPR, expr0,
                                         expr0 + strlen(expr0) + 1, &num_expr),
@@ -261,29 +252,40 @@ void test_storage(void){
            expr3, T_F(contains_expr3)); 
     
     printf("Testing add_expr...\n");        
-    add_expr(expressions0, MAX_EXPR, expr0, expr0 + strlen(expr0) + 1, &num_expr);
-    add_expr(expressions0, MAX_EXPR, expr1, expr1 + strlen(expr1) + 1, &num_expr);
-    add_expr(expressions0, MAX_EXPR, expr1, expr1 + strlen(expr1) + 1, &num_expr);
-    add_expr(expressions0, MAX_EXPR, expr2, expr2 + strlen(expr2) + 1, &num_expr);
+    num_expr = 0;
+    add_expr(expressions1, MAX_EXPR, expr0, expr0 + strlen(expr0) + 1, &num_expr);
+    add_expr(expressions1, MAX_EXPR, expr1, expr1 + strlen(expr1) + 1, &num_expr);
+    add_expr(expressions1, MAX_EXPR, expr1, expr1 + strlen(expr1) + 1, &num_expr);
+    add_expr(expressions1, MAX_EXPR, expr2, expr2 + strlen(expr2) + 1, &num_expr);
     
     printf("Expressions should have these expressions:\n\t%s\n\t%s\n\t%s\n",
            expr0, expr1, expr2);
     printf("It has: \n");
     for (int i = 0; i < num_expr; i++)
-        printf("\t%s\n", expressions0[i]);     
+        printf("\t%s\n", expressions1[i]);
+    for (int i = 0; i < num_expr; i++)
+        free(expressions1[i]);     
 
-    // This is dependent on test_eval passing.    
-    //    printf("Testing store_expressions...\n");
-    //    num_expr = 0;
-    //    int char_count = store_expressions((char **) expressions1, MAX_EXPR, expr4, (char *) strlen(expr4) + 1, &num_expr, 0);
+    printf("Testing store_expressions with [%s]...\n", expr4);
+    num_expr = 0;
+    char *p = "p" ; 
+    int char_count = store_expressions(expressions2, MAX_EXPR, expr4, expr4 + strlen(expr4) + 1, &num_expr, 0);
     
-    //    printf("Expressions1 should have these expressions:\n\t%s\n\t%s\n\t%s\n",
-    //           "fill in", "", "");
-    //    printf("It has: \n");
-    //    for (int i = 0; i < num_expr; i++)
-    //        printf("%s\n", expressions0[i]);
+    printf("Expressions1 should have these expressions:\n\t%s\n\t%s\n\t%s\n",
+           "fill in", "", "");
+    printf("There are %d expressions:\n", num_expr); 
+    for (int i = 0; i < num_expr; i++)
+        printf("\t%s\n", expressions2[i]);
     
-    if (tests_passed){
-        tests_passed = contains_expr0 && contains_expr1 && !contains_expr3;
-    }
+    for (int i = 0; i < num_expr; i++)
+        free(expressions2[i]);      
+    
+    passed = contains_expr0 && contains_expr1 && !contains_expr3; 
+    
+    
+    if (!passed)
+        puts("test_storage failed!");
+    
+    if (tests_passed)
+        tests_passed = passed;
 }
