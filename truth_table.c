@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "validate.h"
 #include "eval.h"
 #include "test.h"
@@ -23,8 +24,8 @@ bool is_actv(int actv_vars[26], int var);
 void print_table(char *expr, bool *char_vals, int *actv_vars, int num_vars, int num_lines);
 
 int main(int argc, char * argv[]){
-    int num_vars, actv_vars[26];
-    bool char_vals[26];
+    int num_vars = 0, actv_vars[26] = {0};
+    bool char_vals[26] = {false};
     
     // Error checks
     if (argc != 2){
@@ -40,47 +41,63 @@ int main(int argc, char * argv[]){
     
     // Register variables
     for (char *p = argv[1]; *p != '\0'; p++){
-        if (isalpha(*p) && !(is_actv(actv_vars, *p - 65))){
-            num_vars++;
-            actv_vars[num_vars] = *p - 65;
+        if (isalpha(*p) && !(is_actv(actv_vars, *p - 65))){ 
+            actv_vars[num_vars++] = toupper(*p) - 65;
         }
     }
-    qsort(actv_vars, num_vars * sizeof(int), sizeof(int), cmpr_vars);
+    
+    qsort(actv_vars, num_vars, sizeof(int), cmpr_vars); 
     
     // Print truth table
-    print_table(argv[1], char_vals, actv_vars, num_vars, 2^num_vars);
+    print_table(argv[1], char_vals, actv_vars, num_vars, (int) pow(2, num_vars + 1));
     
     return 0;
 }
 
+
+void print_line(char *expression[MAX_EXPR], int num_expr){
+    putchar(' ');
+    for (int i = 0; i < num_expr; i++){
+        printf("---");
+        for (char *p = expression[i]; *p != '\0'; p++)
+            putchar('-');
+    } 
+    printf("-\n");
+}
+
+
 void print_table(char *expr, bool *char_vals, int *actv_vars, int num_vars, int num_lines){
     char *expressions[MAX_EXPR];
-    int num_expr = num_vars, 
-    char_count = store_expressions(expressions, MAX_EXPR, expr, expr + strlen(expr), &num_expr, 0);
-    qsort(expressions, sizeof(expressions) / sizeof(char *), sizeof(char *), cmpr_expr);
+    int num_expr = 0;
+    store_expressions(expressions, MAX_EXPR, expr, expr + strlen(expr), &num_expr, 0);
     
-    putchar(' ');
-    for (int i = 0; i < char_count; i++)
-        putchar('-');
-    putchar('\n');
+    qsort(expressions, num_expr, sizeof(char *), cmpr_expr);
+        
+    for (int i = 0; i < num_expr; i++)
+        puts(expressions[i]);
+    print_line(expressions, num_expr);
+    printf(" |");
     
-    for (int i = 0; i < num_lines; i++){
-        set_vals(char_vals, actv_vars, i, num_lines, num_vars);
-        for (int j = 0; j < num_expr; j++){
+    for (int i = 0; i < num_expr; i++){
+        printf(" %s |", expressions[i]);
+    }
+    putchar('\n'); 
+    for (int i = 0; i < num_lines; i++){  
+        set_vals(char_vals, actv_vars, i, num_lines, num_vars + 1);
+        putchar(' ');
+        for (int j = 0; j < num_expr; j++){ 
             int len = strlen(expressions[j]);
-            puts(" | ");
+            printf("| ");
             if (run_expr(expressions[j], char_vals, len, num_vars))
                 putchar('T');
             else 
                 putchar('F');
-            for (int k = 0; k < len + 1; k++)
+            for (int k = 0; k < len; k++)
                 putchar(' ');
         }
+        printf("|\n");
     }
-    putchar(' ');
-    for (int i = 0; i < char_count; i++)
-        putchar('-');
-    putchar('\n');
+    print_line(expressions, num_expr);
 }
 
 
@@ -96,7 +113,9 @@ int cmpr_vars(const void *a, const void *b){
 }
 
 int cmpr_expr(const void *a, const void *b){
-    if (strlen(a) == strlen(b))
-        return strcmp(a, b);
-    return *(const int*) strlen(a) - *(const int*) strlen(b);
+    char *str_one = *(char **) a;
+    char *str_two = *(char **) b; 
+    if (strlen(str_one) == strlen(str_two))
+        return strcmp(str_one, str_two);
+    return strlen(str_one) - strlen(str_two) ;
 }
