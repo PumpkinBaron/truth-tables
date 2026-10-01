@@ -50,6 +50,7 @@ int add_expr(char **expressions, int max_expr, char *expr, char *end, int *num_e
         *q = *p;
     
     new_expr[len] = '\0';
+    
     expressions[(*num_expr)++] = new_expr;  
     
     return end - expr;
@@ -62,13 +63,13 @@ char *get_next(char *expr, char *end){
     return end;
 }
 char *get_prev(char *start, char *cur){
-    for (char *p = cur- 1; p >= start; cur--)
+    for (char *p = cur- 1; cur >= start; cur--)
         if (*p != ' ')
             return p;
     return start;
 }
 
-int store_expressions(char **expressions, int max_expr, char *expr, char *end, int *num_expr, int char_count){
+int store_expressions(char **expressions, int max_expr, char *expr, char *end, int *num_expr, int char_count){ 
     // Adds variables, NOT statements, and statements in parethensis.
     for (char *p = expr; p <= end && *p != '\0'; p++){ 
         if (isalpha(*p)){
@@ -109,16 +110,17 @@ int store_expressions(char **expressions, int max_expr, char *expr, char *end, i
             
             if (*end == '~')
                 p = get_next(p, end);
-            
+             
             // If the end entered a parentheses, go to the end
-            if (p >= expr && *get_prev(expr, p) == '('){
+            if (p <= end && *get_prev(expr, p) == '('){
                 while (p >= expr && *get_prev(expr, p) == '(')
                     p = get_prev(expr, p);
                 p = find_right_para(p, end);
-            }
+            } 
             char_count += add_expr(expressions, max_expr, prev, p, num_expr); 
         }
-    }   // Add OR statements
+    }   
+    // Add OR statements
     for (char *prev, *cur, *p = expr; p <= end && *p != '\0'; p++){  
         if (*p == '|'){  
             // Find the start of the and expression
@@ -139,7 +141,7 @@ int store_expressions(char **expressions, int max_expr, char *expr, char *end, i
                 p = get_next(p, end);
             
             // If the end entered a parentheses, go to the end
-            if (p >= expr && *get_prev(expr, p) == '('){
+            if (p <= expr && *get_prev(expr, p) == '('){
                 while (p >= expr && *get_prev(expr, p) == '(')
                     p = get_prev(expr, p);
                 p = find_right_para(p, end);
