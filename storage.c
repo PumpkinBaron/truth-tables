@@ -15,18 +15,16 @@ bool contains_expr(char **expressions, int max_expr, char *expr, char *end, int 
             if (*q != *r)
                 break;
             else 
-                if (q == end)
+                if (q == end && (end - expr + 1) >=  strlen(*p))
                     return true;
     }
     return false;
 }
 int add_expr(char **expressions, int max_expr, char *expr, char *end, int *num_expr){
     int len = end - expr + 1; 
-    char *new_expr = malloc(len + 1);
+    char *new_expr = malloc(len + 1); 
     
-    
-    
-    if (contains_expr(expressions, max_expr, expr, end, num_expr)){
+    if (contains_expr(expressions, max_expr, expr, end, num_expr)){ 
         return 0;
     }
     
@@ -49,8 +47,7 @@ int add_expr(char **expressions, int max_expr, char *expr, char *end, int *num_e
     for (char *p = expr, *q = new_expr; p <= end; p++, q++)
         *q = *p;
     
-    new_expr[len] = '\0';
-    
+    new_expr[len] = '\0'; 
     expressions[(*num_expr)++] = new_expr;  
     
     return end - expr;
@@ -72,7 +69,7 @@ char *get_prev(char *start, char *cur){
 int store_expressions(char **expressions, int max_expr, char *expr, char *end, int *num_expr, int char_count){ 
     // Adds variables, NOT statements, and statements in parethensis.
     for (char *p = expr; p <= end && *p != '\0'; p++){ 
-        if (isalpha(*p)){
+        if (isalpha(*p)){ 
             char_count += add_expr(expressions, max_expr, p, p, num_expr); 
         } else if (*p == '~'){ 
             if (*get_next(p, end) == '('){ 
