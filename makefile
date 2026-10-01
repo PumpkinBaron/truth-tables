@@ -1,5 +1,5 @@
 truth_table: truth_table.o validate.o storage.o eval.o intervals.o test.o
-	cc -o truth_table truth_table.o eval.o intervals.o storage.o validate.o test.o
+	cc -o truth_table truth_table.o eval.o intervals.o storage.o validate.o test.o -fsanitize=address
 
 truth_table.o: truth_table.c eval.h intervals.h storage.h validate.h test.h
 	cc -c truth_table.c

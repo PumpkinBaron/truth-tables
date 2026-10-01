@@ -1,6 +1,6 @@
-#include <stdbool.h>
-#include <stdio.h>
+#include <stdbool.h> 
 #include <math.h>
+#include <stdio.h>
 
 bool check_intervals(int intervals[676][2], int cur_line, int num_intervals){   
     for (int i = 0; i < num_intervals; i++){ 
@@ -26,6 +26,7 @@ void set_vals(bool *char_vals, int *actv_vars,
               int cur_line, int num_lines, int num_vars){ 
     int intervals[676][2]; 
     
+    
     for (int i = 0; i < num_vars; i++){ 
         int num_intervals = find_intervals(intervals, i + 1, num_lines, cur_line);
         if (check_intervals(intervals, cur_line + 1, num_intervals))
@@ -33,6 +34,6 @@ void set_vals(bool *char_vals, int *actv_vars,
         else
             char_vals[actv_vars[i]] = false;
     }
-              }
+}
               
               

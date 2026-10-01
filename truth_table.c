@@ -10,7 +10,7 @@
 #include "storage.h"
 #include "intervals.h"
 
-#define TEST_ON 1
+#define TEST_ON 0
 #define MAX_EXPR 1000
 
 // Tell quicksort to use alphabetic order 
@@ -33,10 +33,19 @@ int main(int argc, char * argv[]){
                argv[0]);
         exit(EXIT_FAILURE);
     }
-        
+    
     if (TEST_ON)
         run_tests();
    
+    for (char *p = argv[1]; *p != '\0'; p++){
+        if (*p == '<' && *(p + 1) == '-' && *(p + 2) == '>'){
+            *(p + 1) = ' ';
+            *(p + 2) = ' ';
+        } else if (*p == '-' && *(p + 1) == '>')
+            *p = ' ';
+    }
+    puts(argv[1]);
+    
     is_valid(argv[1]);
     
     // Register variables
@@ -45,13 +54,13 @@ int main(int argc, char * argv[]){
         actv_vars[i] = -500;
     
     for (char *p = argv[1]; *p != '\0'; p++){
-        if (isalpha(*p) && !(is_actv(actv_vars, *p - 65))){ 
-            printf("Adding %c\n", *p);
+        if (isalpha(*p) && !(is_actv(actv_vars, *p - 65))){  
             actv_vars[num_vars++] = toupper(*p) - 65;
         }
     }
     
     qsort(actv_vars, num_vars, sizeof(int), cmpr_vars); 
+    
     
     // Print truth table
     print_table(argv[1], char_vals, actv_vars, num_vars, (int) pow(2, num_vars + 1));
@@ -77,7 +86,8 @@ void print_table(char *expr, bool *char_vals, int *actv_vars, int num_vars, int 
     store_expressions(expressions, MAX_EXPR, expr, expr + strlen(expr), &num_expr, 0);
     
     qsort(expressions, num_expr, sizeof(char *), cmpr_expr);
-        
+     
+    
     for (int i = 0; i < num_expr; i++)
         puts(expressions[i]);
     print_line(expressions, num_expr);
@@ -88,7 +98,7 @@ void print_table(char *expr, bool *char_vals, int *actv_vars, int num_vars, int 
     }
     putchar('\n'); 
     for (int i = 0; i < num_lines; i++){  
-        set_vals(char_vals, actv_vars, i, num_lines, num_vars + 1);
+        set_vals(char_vals, actv_vars, i, num_lines, num_vars);
         putchar(' ');
         for (int j = 0; j < num_expr; j++){ 
             int len = strlen(expressions[j]);

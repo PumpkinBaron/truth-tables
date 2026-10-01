@@ -42,11 +42,13 @@ bool run_tests(void){
 void test_validation(void){
     char *expr0 = "hello", *expr1 = "B&~~~~C", *expr2 = "B&&C",
     *expr3 = "A&B&C||D", *expr4 = "A&B&C|D", *expr5 = "A|B&(A|(C|(D&B)))",
-    *expr6 = "A|B&(A|(C|((D&B))", *expr7 = "A|B&(A|(C|)((D&B))))";
+    *expr6 = "A|B&(A|(C|((D&B))", *expr7 = "A|B&(A|(C|)((D&B))))",
+    *expr8 = "A & B", *expr9 = "A | B";
     bool passed, is_valid0 = is_valid(expr0), is_valid1 = is_valid(expr1),
     is_valid2 = is_valid(expr2), is_valid3 = is_valid(expr3), 
     is_valid4 = is_valid(expr4), is_valid5 = is_valid(expr5),
-    is_valid6 = is_valid(expr6), is_valid7= is_valid(expr7);
+    is_valid6 = is_valid(expr6), is_valid7= is_valid(expr7),
+    is_valid8 = is_valid(expr8), is_valid9 = is_valid(expr9);
     puts("\n--------------------------------");
     puts("--------------------------------");
     printf("Testing is_valid...\n");
@@ -67,6 +69,10 @@ void test_validation(void){
            expr6, T_F(is_valid6));
     printf("8. is_valid: %s. Expected: False. Received: %s\n",
            expr7, T_F(is_valid7));
+    printf("9. is_valid: %s. Expected: True. Received: %s\n",
+           expr8, T_F(is_valid8));
+    printf("10. is_valid: %s. Expected: True. Received: %s\n",
+           expr9, T_F(is_valid9));
     
     passed = !is_valid0 && is_valid1 && !is_valid2 && !is_valid3 && is_valid4 && is_valid5 && !is_valid6 && !is_valid7;
     
@@ -229,6 +235,7 @@ void test_storage(void){
     char *expr0 = "this is an expression", *expr1 = "A & B | C (A & ~D)", 
     *expr2 = "z", *expr3 = "Elephant",
     *expr4 = "~P & ~(P | (A | Q)) | P & Q & ~Q | Z | (P & (A & Q))",
+    *expr5 = "F| G",
     *expressions0[MAX_EXPR] = {expr0, expr1}, *expressions1[MAX_EXPR], 
     *expressions2[MAX_EXPR];
     
@@ -243,13 +250,21 @@ void test_storage(void){
     contains_expr1 = contains_expr(expressions0, MAX_EXPR, expr1,
                                    expr1 + strlen(expr1) + 1, &num_expr),
     contains_expr3 = contains_expr(expressions0, MAX_EXPR, expr3,
-                                   expr3 + strlen(expr3) + 1, &num_expr);    
+                                   expr3 + strlen(expr3) + 1, &num_expr),
+    contains_expr4 = contains_expr(expressions0, MAX_EXPR, expr4,
+                                   expr4 + strlen(expr4) + 1, &num_expr),    
+    contains_expr5 = contains_expr(expressions0, MAX_EXPR, expr5,
+                                   expr5 + strlen(expr5) + 1, &num_expr);    
     printf("contains_expr: %s Expected: True. Received %s\n",
            expr0, T_F(contains_expr0));  
     printf("contains_expr: %s Expected: True. Received %s\n",
            expr1, T_F(contains_expr1));  
     printf("contains_expr: %s Expected: False. Received %s\n",
            expr3, T_F(contains_expr3)); 
+    printf("contains_expr: %s Expected: False. Received %s\n",
+           expr4, T_F(contains_expr4)); 
+    printf("contains_expr: %s Expected: False. Received %s\n",
+           expr5, T_F(contains_expr5)); 
     
     printf("Testing add_expr...\n");        
     num_expr = 0;
@@ -280,7 +295,7 @@ void test_storage(void){
     for (int i = 0; i < num_expr; i++)
         free(expressions2[i]);      
     
-    passed = contains_expr0 && contains_expr1 && !contains_expr3; 
+    passed = contains_expr0 && contains_expr1 && !contains_expr3 && !contains_expr4 && !contains_expr5; 
     
     
     if (!passed)
