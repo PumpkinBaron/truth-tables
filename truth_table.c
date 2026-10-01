@@ -24,7 +24,7 @@ bool is_actv(int actv_vars[26], int var);
 void print_table(char *expr, bool *char_vals, int *actv_vars, int num_vars, int num_lines);
 
 int main(int argc, char * argv[]){
-    int num_vars = 0, actv_vars[26] = {0};
+    int num_vars = 0, actv_vars[26];
     bool char_vals[26] = {false};
     
     // Error checks
@@ -40,8 +40,13 @@ int main(int argc, char * argv[]){
     is_valid(argv[1]);
     
     // Register variables
+    // Initialize the array to a number not associated with any variable.
+    for (int i = 0; i < 26; i++)
+        actv_vars[i] = -500;
+    
     for (char *p = argv[1]; *p != '\0'; p++){
         if (isalpha(*p) && !(is_actv(actv_vars, *p - 65))){ 
+            printf("Adding %c\n", *p);
             actv_vars[num_vars++] = toupper(*p) - 65;
         }
     }
