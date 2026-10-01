@@ -36,6 +36,15 @@ bool is_symbol(char c){
         case '|':
             is_symb = true;
             break;
+        case '<':
+            is_symb = true;
+            break;
+        case '-':
+            is_symb = true;
+            break;
+        case '>':
+            is_symb = true;
+            break;
     }
     return is_symb;
 }
@@ -71,7 +80,7 @@ bool is_valid(char *expr){
         while (p != expr + strlen(expr) - 1 && *next == '(' || *next == ')')
             next++;
 
-        if (is_symbol(*p) && 
+        if (is_symbol(*p) && (*p != '<' && *p != '-' && *p != '>') &&
             (((p != expr) && is_symbol(*prev)) || 
             ((p != expr + strlen(expr) - 1) && is_symbol(*next)))){ 
             return false;
@@ -82,7 +91,23 @@ bool is_valid(char *expr){
             return false;
         }
         paren_check(*p);
+        
+        // Correct if statement
+        if (*p == '-' && *(p + 1) != '>'){ 
+            return false;
+        }
+        
+        // Correct ifff statement
+        if (*p == '<' && (*(p + 1) != '-' || *(p + 2) != '>')){ 
+            return false;
+        }
+        
+        // All acceptable characters
+        if (!isalpha(*p) && !is_symbol(*p) && *p != ' '){ 
+            return false;
+        }
     }
+    
     
     if (parentheses != 0) 
         nested_correctly = false;

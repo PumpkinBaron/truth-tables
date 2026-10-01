@@ -85,6 +85,14 @@ bool run_expr(char *expr, bool *char_vals, int len, int num_vars){
                 dup_expr[i] = '0';
         }
     }
+    // Change "<->" to "  <" and "->" to " >"
+    for (int i = 0; i < len; i++){
+        if (dup_expr[i] == '<'){
+            dup_expr[i + 1] = ' ';
+            dup_expr[i + 2] = ' ';
+        } else if (dup_expr[i] == '-')
+            dup_expr[i] = ' ';
+    }
     
     return eval_expr(dup_expr, dup_expr + len);
 }

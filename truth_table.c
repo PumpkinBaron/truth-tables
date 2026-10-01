@@ -28,26 +28,12 @@ int main(int argc, char * argv[]){
     bool char_vals[26] = {false};
     
     // Error checks
-    if (argc != 2){
-        printf("Correct usage: %s [expression], where the expression has no spaces.\n",
+    if (argc != 2 || !is_valid(argv[1])){
+        printf("\nInvalid syntax. Correct usage: %s [expression], where the expression has no spaces.\n\n",
                argv[0]);
         exit(EXIT_FAILURE);
     }
-    
-    if (TEST_ON)
-        run_tests();
-   
-    for (char *p = argv[1]; *p != '\0'; p++){
-        if (*p == '<' && *(p + 1) == '-' && *(p + 2) == '>'){
-            *(p + 1) = ' ';
-            *(p + 2) = ' ';
-        } else if (*p == '-' && *(p + 1) == '>')
-            *p = ' ';
-    }
-    puts(argv[1]);
-    
-    is_valid(argv[1]);
-    
+     
     // Register variables
     // Initialize the array to a number not associated with any variable.
     for (int i = 0; i < 26; i++)
@@ -86,10 +72,7 @@ void print_table(char *expr, bool *char_vals, int *actv_vars, int num_vars, int 
     store_expressions(expressions, MAX_EXPR, expr, expr + strlen(expr), &num_expr, 0);
     
     qsort(expressions, num_expr, sizeof(char *), cmpr_expr);
-     
-    
-    for (int i = 0; i < num_expr; i++)
-        puts(expressions[i]);
+      
     print_line(expressions, num_expr);
     printf(" |");
     
